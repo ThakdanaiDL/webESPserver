@@ -31,7 +31,7 @@
 
 <script>
   // ใส่ URL ของ Broker ที่คุณมีอยู่
-  const client = mqtt.connect("wss://onpremise.asefa.mdbiot.com:1883");
+  const client = mqtt.connect("wss://mqtt.mdbiot.com:1883");
 
   client.on("connect", () => {
     console.log("Connected!");
