@@ -30,12 +30,27 @@
 </div>
 
 <script>
-  // ใส่ URL ของ Broker ที่คุณมีอยู่
-  const client = mqtt.connect("wss://meow4.mdbiot.com:8884");
+
+  // 👇 ค่า MQTT Broker (WSS)
+  const client = mqtt.connect("wss://meow4.mdbiot.com:8884/mqtt", {
+      protocol: "wss",
+      clientId: "web_" + Math.random().toString(16).substr(2, 8),
+      clean: true,
+
+      // ถ้ามี username/password ใส่ที่นี่
+      // username: "user",
+      // password: "pass",
+
+      reconnectPeriod: 1000,
+  });
 
   client.on("connect", () => {
-    console.log("Connected!");
+    console.log("MQTT Connected!");
     client.subscribe("meow/sn123");
+  });
+
+  client.on("error", (err) => {
+    console.error("MQTT Error: ", err);
   });
 
   client.on("message", (topic, msg) => {
@@ -48,7 +63,6 @@
       ssid: document.getElementById("ssid").value,
       password: document.getElementById("password").value
     };
-
     client.publish("res/sn123", JSON.stringify(payload));
   }
 
@@ -57,6 +71,7 @@
       JSON.stringify({mode:"write", RL1:"1"})
     );
   }
+
 </script>
 
 </body>
