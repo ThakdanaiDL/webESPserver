@@ -49,28 +49,40 @@
 
 <script>
   // ===========================
-  // MQTT WebSocket (WS) CONFIG
+  // MQTT WebSocket (WSS) CONFIG
   // ===========================
-  const client = mqtt.connect("ws://meow4.mdbiot.com:1884/mqtt", {
-      protocol: "ws",
+  const client = mqtt.connect("wss://meow4.mdbiot.com:8884/mqtt", {
+      protocol: "wss",
       clientId: "web_" + Math.random().toString(16).substr(2, 8),
       clean: true,
       reconnectPeriod: 1000,
 
-      // ถ้าบรอคเกอร์มี auth ใส่ตรงนี้
+      // ถ้า broker ต้องการ username/password ให้ใส่ตรงนี้
       // username: "user",
       // password: "pass",
   });
 
-  // Connected
+  // MQTT Connected
   client.on("connect", () => {
-    console.log("MQTT Connected via WS!");
+    console.log("MQTT Connected via WSS!");
+    document.getElementById("status").innerText = "Connected";
     client.subscribe("meow/sn123");
   });
 
   // Error handler
   client.on("error", (err) => {
     console.error("MQTT Error:", err);
+    document.getElementById("status").innerText = "Error: " + err.message;
+  });
+
+  // Connection closed
+  client.on("close", () => {
+    document.getElementById("status").innerText = "Disconnected";
+  });
+
+  // Reconnecting
+  client.on("reconnect", () => {
+    document.getElementById("status").innerText = "Reconnecting...";
   });
 
   // Receive message
@@ -87,7 +99,6 @@
       ssid: document.getElementById("ssid").value,
       password: document.getElementById("password").value
     };
-
     client.publish("res/sn123", JSON.stringify(payload));
   }
 
@@ -99,7 +110,6 @@
       mode: "write",
       RL1: "1"
     };
-
     client.publish("res/sn123", JSON.stringify(payload));
   }
 </script>
