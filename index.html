@@ -1,40 +1,108 @@
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Device WebConfig</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      margin-right: 5px;
+    }
+    #statusBox {
+      margin-top: 20px;
+      padding: 10px;
+      background: #eee;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Device WebConfig</h2>
+
+<label>SSID</label>
+<input id="ssid" type="text">
+
+<label>Password</label>
+<input id="password" type="text">
+
+<button onclick="saveConfig()">Save Config</button>
+<button onclick="toggleRelay()">Toggle Relay</button>
+
+<div id="statusBox">
+  Status: <span id="status">-</span>
+</div>
 
 <script>
-
+  // ===========================
+  // MQTT WebSocket (WS) CONFIG
+  // ===========================
   const client = mqtt.connect("ws://meow4.mdbiot.com:1884/mqtt", {
       protocol: "ws",
       clientId: "web_" + Math.random().toString(16).substr(2, 8),
       clean: true,
       reconnectPeriod: 1000,
+
+      // ถ้าบรอคเกอร์มี auth ใส่ตรงนี้
+      // username: "user",
+      // password: "pass",
   });
 
+  // Connected
   client.on("connect", () => {
-    console.log("MQTT Connected (WS)!");
+    console.log("MQTT Connected via WS!");
     client.subscribe("meow/sn123");
   });
 
+  // Error handler
   client.on("error", (err) => {
-    console.error("MQTT Error: ", err);
+    console.error("MQTT Error:", err);
   });
 
+  // Receive message
   client.on("message", (topic, msg) => {
     document.getElementById("status").innerText = msg.toString();
   });
 
+  // ===========================
+  // SEND WIFI CONFIG
+  // ===========================
   function saveConfig() {
     const payload = {
       mode: "wifi_config",
       ssid: document.getElementById("ssid").value,
       password: document.getElementById("password").value
     };
+
     client.publish("res/sn123", JSON.stringify(payload));
   }
 
+  // ===========================
+  // TOGGLE RELAY
+  // ===========================
   function toggleRelay() {
-    client.publish("res/sn123",
-      JSON.stringify({mode:"write", RL1:"1"})
-    );
-  }
+    const payload = {
+      mode: "write",
+      RL1: "1"
+    };
 
+    client.publish("res/sn123", JSON.stringify(payload));
+  }
 </script>
+
+</body>
+</html>
